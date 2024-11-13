@@ -1,0 +1,15 @@
+<h1>Datos de Corriente</h1>
+<table>
+    <tr>
+        <th>Hora</th>
+        <th>Corriente (mA)</th>
+        <th>Tiempo Restante (hrs)</th>
+    </tr>
+    {% for entry in current_data %}
+    <tr>
+        <td>{{ entry.timestamp }}</td>
+        <td>{{ entry.current_mA }}</td>
+        <td>{{ entry.remaining_time }}</td>
+    </tr>
+    {% endfor %}
+</table>

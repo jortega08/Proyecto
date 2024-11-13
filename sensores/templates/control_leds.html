@@ -1,0 +1,28 @@
+<!-- control_leds.html -->
+<button onclick="toggleLed(1, true)">Encender LED 1</button>
+<button onclick="toggleLed(1, false)">Apagar LED 1</button>
+<button onclick="toggleLed(2, true)">Encender LED 2</button>
+<button onclick="toggleLed(2, false)">Apagar LED 2</button>
+<button onclick="toggleLed(3, true)">Encender LED 3</button>
+<button onclick="toggleLed(3, false)">Apagar LED 3</button>
+<button onclick="toggleLed(4, true)">Encender LED 4</button>
+<button onclick="toggleLed(4, false)">Apagar LED 4</button>
+
+<script>
+    function toggleLed(ledNumber, state) {
+        fetch('/api/led-control/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'  // si usas CSRF
+            },
+            body: JSON.stringify({ [`led${ledNumber}`]: state })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(`LED ${ledNumber} ahora está ${state ? 'encendido' : 'apagado'}`);
+            console.log(data);
+        })
+        .catch(error => console.error('Error:', error));
+    }
+</script>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitoreo de Batería</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Monitoreo de Batería</h1>
+
+    <div>
+        <h3>Datos actuales de la batería</h3>
+        <p><strong>Voltaje:</strong> <span id="voltaje">0.0</span> V</p>
+        <p><strong>Porcentaje:</strong> <span id="porcentaje">0.0</span> %</p>
+        <p><strong>Tiempo restante:</strong> <span id="tiempoRestante">0.0</span> h</p>
+    </div>
+
+    <div>
+        <canvas id="batteryChart"></canvas>
+    </div>
+
+    <div>
+        <canvas id="currentChart"></canvas>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            // Función para obtener los datos de batería
+            function getBatteryData() {
+                $.get("/sensores/battery_data/", function(data) {
+                    // Procesar y mostrar los datos en los gráficos
+                    let labels = data.map(entry => entry.timestamp);
+                    let voltages = data.map(entry => entry.voltage);
+                    let percentages = data.map(entry => entry.percentage);
+
+                    // Actualizar gráfico de voltaje
+                    updateChart('batteryChart', labels, voltages, 'Voltaje (V)', 'Voltaje');
+
+                    // Actualizar gráfico de porcentaje
+                    updateChart('currentChart', labels, percentages, 'Porcentaje (%)', 'Porcentaje de carga');
+
+                    // Mostrar los últimos datos en la interfaz
+                    $('#voltaje').text(voltages[0]);
+                    $('#porcentaje').text(percentages[0]);
+                    $('#tiempoRestante').text(calculateRemainingTime(voltages[0], percentages[0]));
+                });
+            }
+
+            // Función para obtener los datos de corriente
+            function getCurrentData() {
+                $.get("/sensores/current_data/", function(data) {
+                    // Procesar los datos de corriente (si necesitas graficarlos o mostrarlos)
+                    console.log(data);
+                });
+            }
+
+            // Función para actualizar el gráfico con datos nuevos
+            function updateChart(chartId, labels, data, label, labelTitle) {
+                let ctx = document.getElementById(chartId).getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',  // Tipo de gráfico (línea)
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: labelTitle,
+                            data: data,
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            fill: false,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            x: {
+                                type: 'time',
+                                time: {
+                                    unit: 'minute',
+                                    tooltipFormat: 'll HH:mm',
+                                },
+                            },
+                            y: {
+                                ticks: {
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Función para calcular el tiempo restante basado en el voltaje y porcentaje
+            function calculateRemainingTime(voltaje, porcentaje) {
+                let remainingTime = (2200 * porcentaje / 100) / 1000;  // Simplificación de la fórmula
+                return remainingTime.toFixed(2);
+            }
+
+            // Llamar a la función para obtener los datos y cargar los gráficos
+            getBatteryData();
+
+            // Refrescar los datos cada 5 segundos
+            setInterval(getBatteryData, 5000);
+        });
+    </script>
+</body>
+</html>

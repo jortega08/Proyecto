@@ -1,0 +1,15 @@
+<h1>Battery Data</h1>
+<table>
+    <tr>
+        <th>Timestamp</th>
+        <th>Voltage (V)</th>
+        <th>Percentage (%)</th>
+    </tr>
+    {% for entry in battery_data %}
+    <tr>
+        <td>{{ entry.timestamp }}</td>
+        <td>{{ entry.voltage }}</td>
+        <td>{{ entry.percentage }}</td>
+    </tr>
+    {% endfor %}
+</table>
